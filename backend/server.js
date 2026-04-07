@@ -11,9 +11,11 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? (process.env.FRONTEND_URL || '*')
-      : '*',
+    origin: [
+      /https:\/\/near-.*\.vercel\.app$/,
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ],
     credentials: true
   }
 });
@@ -21,12 +23,15 @@ const io = new Server(httpServer, {
 connectDB();
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? (process.env.FRONTEND_URL || '*')
-    : '*',
+  origin: [
+    /https:\/\/near-.*\.vercel\.app$/,
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Routes
 app.use('/api/auth', require('./src/routes/authRoutes'));
@@ -64,4 +69,11 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`Port ${PORT} busy, trying ${PORT + 1}...`);
+    httpServer.listen(PORT + 1, () => console.log(`Server running on port ${PORT + 1}`));
+  } else throw err;
+});
