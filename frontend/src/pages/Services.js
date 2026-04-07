@@ -25,7 +25,7 @@ const Services = () => {
     } else if (location.state?.service) {
       fetchWorkers(location.state.service);
     }
-  }, [location.state]);
+  }, [location.state, user?.role]);
 
   const fetchWorkers = async (service) => {
     setLoading(true);

@@ -10,12 +10,22 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: '*' }
+  cors: {
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.FRONTEND_URL 
+      : '*',
+    credentials: true
+  }
 });
 
 connectDB();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : '*',
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -26,6 +36,11 @@ app.use('/api/bookings', require('./src/routes/bookingRoutes'));
 app.use('/api/admin', require('./src/routes/adminRoutes'));
 app.use('/api/chat', require('./src/routes/chatRoutes'));
 app.use('/api/notifications', require('./src/routes/notificationRoutes'));
+
+// Health check route
+app.get('/', (req, res) => {
+  res.json({ message: 'NearFix API is running', status: 'OK' });
+});
 
 // Socket.io
 io.on('connection', (socket) => {

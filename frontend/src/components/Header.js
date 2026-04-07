@@ -8,7 +8,8 @@ import { FiSun, FiMoon, FiMenu, FiX, FiUser, FiLogOut, FiHome, FiBriefcase, FiSe
 import NotificationDropdown from './NotificationDropdown';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const SOCKET_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const socket = io(SOCKET_URL);
 
 const Header = () => {
   const { user, logout } = useContext(AuthContext);
