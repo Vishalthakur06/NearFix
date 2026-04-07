@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
 
   // Typing indicator
   socket.on('typing', ({ bookingId, receiverId, isTyping }) => {
-    io.to(receiverId).emit('userTyping', { bookingId, isTyping });
+    socket.to(receiverId).emit('userTyping', { bookingId, isTyping });
   });
 
   socket.on('disconnect', () => {

@@ -25,8 +25,13 @@ const Chat = () => {
     fetchMessages();
     
     // Socket connection
-    const socketUrl = `http://${window.location.hostname}:5000`;
-    socketRef.current = io(socketUrl);
+    const socketUrl = process.env.REACT_APP_API_URL || `http://${window.location.hostname}:5000`;
+    socketRef.current = io(socketUrl, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5
+    });
     socketRef.current.emit('join', user._id);
 
     // Listen for new messages
